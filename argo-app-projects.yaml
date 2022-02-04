@@ -1,0 +1,96 @@
+#
+# When using the app of apps deployment pattern for bootstrapping a cluster with a set of applications,
+# a top-level parent Application resource is created, typically as a Helm chart.
+# This chart comprises a set of templates, each of which is a child Application.
+# The ArgoCD Application Controller responds only to Application resources deployed to the 'argocd' namespace.
+# The 'applications-project' AppProject allows a non-admin user to deploy only Application resources in the 'argocd' namespace.
+# Its counterpart 'workloads-project' is used for actual workloads whch allows the user to deploy other resources such as Deployment, DaemonSet etc.
+#
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: applications-project
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Project for parent applicatons used when employing app of apps pattern
+  sourceRepos:
+  - git@github.com:spkane/eks-crossplane-argocd.git
+
+  #
+  # Allow this project to deploy only to 'argocd' namespace
+  #
+  destinations:
+  - namespace: argocd
+    server: https://kubernetes.default.svc
+  #
+  # Deny all namespace-scoped resources from being created, except for Application
+  #
+  namespaceResourceWhitelist:
+  - group: 'argoproj.io'
+    kind: Application
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: workloads-project
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Project for deploying Crossplane with ArgoCD
+  sourceRepos:
+  - git@github.com:spkane/eks-crossplane-argocd.git
+
+  #
+  # List of namespaces/clusters to which Applications in this project can be deployed into
+  #
+  destinations:
+  - namespace: crossplane-system
+    server: https://kubernetes.default.svc   
+  - namespace: kube-system
+    server: https://kubernetes.default.svc   
+  - namespace: sealed-secrets
+    server: https://kubernetes.default.svc  
+  - namespace: eks
+    server: https://kubernetes.default.svc      
+
+  #
+  # Deny all cluster-scoped resources from being created, except for the ones listed
+  #
+  clusterResourceWhitelist:
+  - group: ''
+    kind: Namespace
+  - group: 'rbac.authorization.k8s.io'
+    kind: ClusterRole
+  - group: 'rbac.authorization.k8s.io'
+    kind: ClusterRoleBinding    
+  - group: 'policy'
+    kind: PodSecurityPolicy     
+  - group: 'apiextensions.k8s.io'
+    kind: CustomResourceDefinition
+  - group: 'pkg.crossplane.io'
+    kind: Configuration    
+  - group: 'pkg.crossplane.io'
+    kind: Lock   
+  - group: 'pkg.crossplane.io'
+    kind: Provider        
+  - group: 'aws.crossplane.io'
+    kind: ProviderConfig     
+  - group: 'eks.sarathy.io'
+    kind: EKSCluster      
+  - group: 'eks.aws.crossplane.io'
+    kind: NodeGroup
+  - group: 'eks.aws.crossplane.io'
+    kind: Cluster    
+  #
+  # Allow all namespace-scoped resources to be created, except for ResourceQuota, LimitRange, NetworkPolicy
+  #
+  namespaceResourceBlacklist:
+  - group: ''
+    kind: ResourceQuota
+  - group: ''
+    kind: LimitRange
+  - group: ''
+    kind: NetworkPolicy

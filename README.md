@@ -6,7 +6,6 @@
   * [Blog](https://aws.amazon.com/blogs/containers/gitops-model-for-provisioning-and-bootstrapping-amazon-eks-clusters-using-crossplane-and-argo-cd/)
   * [Github](https://github.com/aws-samples/eks-gitops-crossplane-argocd)
 
-
 ## Setup Management k8s Cluster
 
 * It might be possible to install this on EKS Fargate, but we would need to double-check. Fargate nodes appear to be tainted by default.
@@ -51,7 +50,6 @@ aws_secret_access_key = Ow3HUaP8BbqkV4dUrZr0H7yT5nGP5OPFcZJ+
 
 * Create a k8s secret in the cluster that contains AWS credentials from the file.
 
-
 ```sh
 kubectl create secret generic aws-credentials --namespace crossplane-system --from-file=credentials=./secret-aws-creds
 ```
@@ -73,13 +71,13 @@ spec:
 ```
 
 ```sh
-cd eks-configuration
+cd crossplane-xrds/eks-configuration
 rm *.xpkg
 kubectl crossplane build configuration
 kubectl crossplane push configuration ${IMAGE_REPO}:${IMAGE_TAG}
 kubectl crossplane install configuration ${IMAGE_REPO}:${IMAGE_TAG}
 #kubectl crossplane install configuration ./*.xpkg
-cd ..
+cd ../..
 ```
 
 * Provide reasonable IAM roles in the `eks-cluster-xr.yaml` file and then apply it.
@@ -154,7 +152,15 @@ eksctl create cluster --name xplane-mgmt --version 1.21
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 # Install the `argocd `CLI via https://argo-cd.readthedocs.io/en/stable/cli_installation/
-# External API Access: kubectl -n argocd patch svc argocd-server -p '{"spec": {"type": "LoadBalancer"}}'
+kubectl port-forward -n argocd service/argocd-server 8080:80
+# External API Access could be achieved with: kubectl -n argocd patch svc argocd-server -p '{"spec": {"type": "LoadBalancer"}}'
+kubectl -n argocd get secret argocd-initial-admin-secret --template={{.data.password}} | base64 -D; echo
+argocd login localhost:8443
+argocd account update-password
+kubectl -n argocd delete secret argocd-initial-admin-secret
+kubectl apply -f ./argo-app-projects.yaml
+kubectl apply -f ./argo-application-crossplane.yaml
+argocd app create --file argo-application-crossplane.yaml
 ```
 
-### See: https://github.com/aws-samples/eks-gitops-crossplane-argocd/blob/main/argocd.sh
+* Register a remote k8s server with Argo and then deploy some apps to it

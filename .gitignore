@@ -1,4 +1,7 @@
+.DS_Store
 .env
 .secret*
 secret*
+mysealedsecret.*
+mysecret.*
 *.xpkg
