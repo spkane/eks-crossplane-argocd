@@ -9,7 +9,7 @@ metadata:
 spec:
   project: workloads-project
   source:
-    repoURL: git@github.com:spkane/eks-crossplane-argocd.git
+    repoURL: https://github.com/spkane/eks-crossplane-argocd
     targetRevision: HEAD
     path: argo-apps/crossplane-complete
   destination:

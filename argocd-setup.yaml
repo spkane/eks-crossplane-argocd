@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/part-of: argocd
 data:
   #
-  # Check out this FAQ as to why this is needed.
+  # Check out this FAQ as to why this first block is needed.
   # https://argoproj.github.io/argo-cd/faq/#why-are-resources-of-type-sealedsecret-stuck-in-the-progressing-state
   #
   resource.customizations.health.bitnami.com_SealedSecret: |
@@ -17,6 +17,9 @@ data:
     hs.status = "Healthy"
     hs.message = "Controller doesn't report resource status"
     return hs
+  # This is here to ignore k8s AggregatedRoles diffs as they will always look out of sync
+  resource.compareoptions: |
+    ignoreAggregatedRoles: true
 ---
 #
 # If you are connecting repositories via SSH, ArgoCD will need to know the SSH known hosts public key of the repository servers.
@@ -78,3 +81,13 @@ stringData:
   url: https://charts.crossplane.io/stable
   type: helm
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: eks-crossplane-argocd
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  type: git
+  url: https://github.com/spkane/eks-crossplane-argocd
