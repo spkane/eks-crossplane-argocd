@@ -4,6 +4,3 @@
 secret*
 *.xpkg
 
-# These can be safely commited to git (in general)
-# But I am not doing that for this use case.
-*-sealed.yaml
