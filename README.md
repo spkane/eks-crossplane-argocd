@@ -2,7 +2,7 @@
 
 ## Install (Imperative)
 
-* Roughly as described here:
+* Heavily inspired by this:
   * [Blog](https://aws.amazon.com/blogs/containers/gitops-model-for-provisioning-and-bootstrapping-amazon-eks-clusters-using-crossplane-and-argo-cd/)
   * [Github](https://github.com/aws-samples/eks-gitops-crossplane-argocd)
 
@@ -163,12 +163,18 @@ kubectl apply -f ./argo-app-projects.yaml
 kubectl apply -f ./argo-application-crossplane.yaml
 # Wait for things to stabilize...
 ```
+* Want to look at the UI?
 
+```sh
+kubectl port-forward -n argocd service/argocd-server 8443:443
+```
+
+* Then open up a web browser pointing to [https://127.0.0.1:443/](https://127.0.0.1:443/) and login with the credentials you set earlier.
 * [Install](https://github.com/bitnami-labs/sealed-secrets/releases) the `kubeseal` CLI
 * Prepare real secrets for the AWS provider
 
 ```sh
-cd argo-apps/crossplane-complete/templates
+cd argo-apps/crossplane-complete/examples
 cp 3-aws-credentials-unsealed-unencrypted secret-3-aws-credentials-unsealed-unencrypted
 ```
 
@@ -190,14 +196,22 @@ cat ./secret-aws-creds | base64
 * Seal the secret
 
 ```sh
-kubeseal --format yaml --controller-namespace=sealed-secrets --controller-name=sealed-secrets-controller < secret-3-aws-credentials-unsealed-unencrypted > 3-aws-credentials-sealed.yaml
+kubeseal --format yaml --controller-namespace=sealed-secrets --controller-name=sealed-secrets-controller < secret-3-aws-credentials-unsealed-unencrypted > ../templates/3-aws-credentials-sealed.yaml
 cd ../../..
 ```
 
+* This is gitops, so push the changes.
+
 ```sh
-# argocd app create --file argo-application-crossplane.yaml
-kubectl apply -f ./argo-application-crossplane.yaml
+git add .
+git commit -m "update"
+git push origin master
 # Wait for things to stabilize...
 ```
 
-* Register a remote k8s server with Argo and then deploy some apps to it
+* Register a remote k8s server with Argo and then deploy some apps to it (or we can deploy them to the mangement cluster if that is the goal).
+
+```sh
+#argocd app create --file application-apps.yaml
+kubectl apply -f ./argo-apps-of-apps.yaml
+```

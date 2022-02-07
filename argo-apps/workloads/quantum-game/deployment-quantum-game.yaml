@@ -1,0 +1,60 @@
+---  
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quantum-game
+  namespace: nodejs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: quantum-game
+      role: web-service
+  template:
+    metadata:
+      labels:
+        app: quantum-game
+        role: web-service
+      annotations:
+        prometheus.io/scrape: 'false'
+    spec: 
+      containers:
+        - name: node
+          image: docker.io/spkane/quantum-game:latest
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "128m"
+              memory: "128Mi"
+          livenessProbe:
+            httpGet: 
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet: 
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 10
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quantum-game-svc
+  namespace: nodejs
+spec:
+  sessionAffinity: None
+  type: ClusterIP
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: quantum-game
+    role: web-service
