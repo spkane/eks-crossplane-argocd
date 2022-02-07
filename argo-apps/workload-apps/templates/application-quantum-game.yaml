@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: s3reader
+  name: quantum-game
   namespace: argocd
   finalizers:
   - resources-finalizer.argocd.argoproj.io
@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/spkane/eks-crossplane-argocd
     targetRevision: HEAD
-    path: argo-apps/workloads/s3reader
+    path: argo-apps/workloads/quantum-game
   destination:
     server: {{ .Values.spec.destination.server }}
     namespace: nodejs
