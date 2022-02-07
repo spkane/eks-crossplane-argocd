@@ -48,13 +48,17 @@ spec:
   #
   destinations:
   - namespace: crossplane-system
-    server: https://kubernetes.default.svc   
+    server: https://kubernetes.default.svc
   - namespace: kube-system
-    server: https://kubernetes.default.svc   
+    server: https://kubernetes.default.svc
   - namespace: sealed-secrets
-    server: https://kubernetes.default.svc  
+    server: https://kubernetes.default.svc
   - namespace: eks
-    server: https://kubernetes.default.svc      
+    server: https://kubernetes.default.svc
+  - namespace: monitoring
+    server: https://kubernetes.default.svc
+  - namespace: nodejs
+    server: https://kubernetes.default.svc
 
   #
   # Deny all cluster-scoped resources from being created, except for the ones listed
