@@ -40,7 +40,7 @@ kubectl crossplane install provider crossplane/provider-aws:v0.23.0
 
 * There are a few options for Auth, we are just passing in credentials for this test.
 
-* Create a file with the AWS credentials in it, in this format:
+* Create a file called `secret-aws-creds` with the AWS credentials in it, in this format:
 
 ```ini
 [default]
@@ -159,8 +159,45 @@ argocd login localhost:8443
 argocd account update-password
 kubectl -n argocd delete secret argocd-initial-admin-secret
 kubectl apply -f ./argo-app-projects.yaml
+# argocd app create --file argo-application-crossplane.yaml
 kubectl apply -f ./argo-application-crossplane.yaml
-argocd app create --file argo-application-crossplane.yaml
+# Wait for things to stabilize...
+```
+
+* [Install](https://github.com/bitnami-labs/sealed-secrets/releases) the `kubeseal` CLI
+* Prepare real secrets for the AWS provider
+
+```sh
+cd argo-apps/crossplane-complete/templates
+cp 3-aws-credentials-unsealed-unencrypted secret-3-aws-credentials-unsealed-unencrypted
+```
+
+* Create a file called `secret-aws-creds` with the AWS credentials in it, in this format:
+
+```ini
+[default]
+aws_access_key_id =ABCDEFGHIJ0123456789
+aws_secret_access_key = Ow3HUaP8BbqkV4dUrZr0H7yT5nGP5OPFcZJ+
+```
+
+* Get the secret into a Base64 encoded string.
+
+```sh
+cat ./secret-aws-creds | base64
+```
+
+* Add the base64 encoded string to the file `secret-3-aws-credentials-unsealed-unencrypted`
+* Seal the secret
+
+```sh
+kubeseal --format yaml --controller-namespace=sealed-secrets --controller-name=sealed-secrets-controller < secret-3-aws-credentials-unsealed-unencrypted > 3-aws-credentials-sealed.yaml
+cd ../../..
+```
+
+```sh
+# argocd app create --file argo-application-crossplane.yaml
+kubectl apply -f ./argo-application-crossplane.yaml
+# Wait for things to stabilize...
 ```
 
 * Register a remote k8s server with Argo and then deploy some apps to it
