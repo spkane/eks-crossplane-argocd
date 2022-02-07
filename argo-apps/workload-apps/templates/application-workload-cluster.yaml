@@ -1,0 +1,28 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: workload-cluster 
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: workloads-project
+  source:
+    repoURL: https://github.com/spkane/eks-crossplane-argocd
+    targetRevision: HEAD
+    path: argo-apps/workloads/cluster
+  destination:
+    server: {{ .Values.spec.destination.server }}
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: false
+    syncOptions:
+    - CreateNamespace=flase
+    retry:
+      limit: 1
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m
