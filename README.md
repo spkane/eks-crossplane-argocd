@@ -126,7 +126,7 @@ kubectl get managed
 kubectl get crossplane  # get all resources related to Crossplane.
 kubectl get composite   # get all resources that represent an XR
 kubectl get claim
-kubectl get pkg
+kubectl get configuration.pkg
 ```
 
 ### Cleanup (Imperative)
@@ -280,7 +280,7 @@ kubectl get managed
 kubectl get crossplane  # get all resources related to Crossplane.
 kubectl get composite   # get all resources that represent an XR
 kubectl get claim
-kubectl get pkg
+kubectl get configuration.pkg
 ```
 
 - Get new cluster name and update it's context:
