@@ -13,7 +13,7 @@ spec:
     targetRevision: HEAD
     path: argo-apps/workloads/quantum-game
   destination:
-    server: {{ .Values.spec.destination.server }}
+    name: {{ .Values.spec.destination.name }}
     namespace: nodejs
   syncPolicy:
     automated:

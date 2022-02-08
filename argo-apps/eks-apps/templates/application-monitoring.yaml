@@ -18,7 +18,7 @@ spec:
       - grafana-values.yaml
       - prometheus-values.yaml
   destination:
-    server: {{ .Values.spec.destination.server }}
+    name: {{ .Values.spec.destination.name }}
     namespace: monitoring
   syncPolicy:
     automated:

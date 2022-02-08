@@ -7,7 +7,7 @@ metadata:
   finalizers:
   - resources-finalizer.argocd.argoproj.io  
 spec:
-  project: workloads-project
+  project: applications-project
   source:
     repoURL: https://github.com/spkane/eks-crossplane-argocd
     targetRevision: HEAD
@@ -18,7 +18,7 @@ spec:
           destination:
             name: eks.cluster
   destination:
-    name: eks.cluster
+    server: https://kubernetes.default.svc
     namespace: argocd
   syncPolicy:
     automated:
