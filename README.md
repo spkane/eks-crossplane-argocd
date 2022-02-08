@@ -20,6 +20,7 @@
       - [Add the Cluster to Argo CD](#add-the-cluster-to-argo-cd)
       - [Deploy apps to our cluster(s) via Argo](#deploy-apps-to-our-clusters-via-argo)
     - [Cleanup (Declarative)](#cleanup-declarative)
+  - [Other Notes](#other-notes)
 
 - Heavily inspired by this:
   - [Blog](https://aws.amazon.com/blogs/containers/gitops-model-for-provisioning-and-bootstrapping-amazon-eks-clusters-using-crossplane-and-argo-cd/)
@@ -104,10 +105,11 @@ kubectl crossplane install configuration ${IMAGE_REPO}:${IMAGE_TAG}
 cd ../..
 ```
 
-- Provide reasonable IAM roles in the `eks-cluster-xr.yaml` file and then apply it.
-  - `arn:aws:iam::aws:policy/AmazonEKSClusterPolicy` is likely the minimum.
-
 #### Setup Managed Resources
+
+- Provide reasonable IAM roles in the `eks-cluster-xr.yaml` file and then apply it.
+  - The role likely needs at least these permissions: `arn:aws:iam::aws:policy/AmazonEKSClusterPolicy`, `arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy`, `arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy`, `arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly`
+  - and these service principals: `ec2.amazonaws.com`, `eks.amazonaws.com`
 
 ```sh
 kubectl apply -f ./eks-cluster-xr.yaml
@@ -255,13 +257,15 @@ kubectl crossplane build configuration
 kubectl crossplane push configuration ${IMAGE_REPO}:${IMAGE_TAG}
 kubectl crossplane install configuration ${IMAGE_REPO}:${IMAGE_TAG}
 #kubectl crossplane install configuration ./*.xpkg
+#kubectl crossplane install configuration registry.upbound.io/upbound/platform-ref-aws:v0.2.2
 cd ../..
 ```
 
-- Provide reasonable IAM roles in the `eks-cluster-xr.yaml` file and then apply it.
-  - `arn:aws:iam::aws:policy/AmazonEKSClusterPolicy` is likely the minimum.
-
 #### Spin up the EKS cluster
+
+- Provide reasonable IAM roles in the `eks-cluster-xr.yaml` file and then apply it.
+  - The role likely needs at least these permissions: `arn:aws:iam::aws:policy/AmazonEKSClusterPolicy`, `arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy`, `arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly`
+  - and these service principals: `ec2.amazonaws.com`, `eks.amazonaws.com`
 
 ```sh
 kubectl apply -f ./argo-eks-cluster.yaml
@@ -328,3 +332,11 @@ kubectl port-forward -n monitoring service/observability-grafana 3000:80
 ### Cleanup (Declarative)
 
 ...
+## Other Notes
+
+- [crossplane-contrib/provider-argocd](https://github.com/crossplane-contrib/provider-argocd)
+- [crossplane-contrib/provider-terraform](https://github.com/crossplane-contrib/provider-terraform)
+  - [crossplane/terrajet](https://github.com/crossplane/terrajet)
+- [crossplane-contrib/provider-kubernetes](https://github.com/crossplane-contrib/provider-kubernetes)
+- [crossplane-contrib/provider-helm](https://github.com/crossplane-contrib/provider-helm)
+- [crossplane-contrib/provider-github](https://github.com/crossplane-contrib/provider-github)

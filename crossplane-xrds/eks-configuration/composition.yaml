@@ -468,7 +468,7 @@ spec:
 
     - name: eks-nodegroup
       base:
-        apiVersion: eks.aws.crossplane.io/v1beta1
+        apiVersion: eks.aws.crossplane.io/v1alpha1
         kind: NodeGroup
         spec:
           forProvider:
