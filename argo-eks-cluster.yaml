@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: eks-apps
+  name: eks-cluster
   namespace: argocd
   finalizers:
   - resources-finalizer.argocd.argoproj.io  
@@ -11,14 +11,14 @@ spec:
   source:
     repoURL: https://github.com/spkane/eks-crossplane-argocd
     targetRevision: HEAD
-    path: argo-apps/eks-apps
+    path: argo-apps/eks-cluster
     helm:
       values: |
         spec:
           destination:
-            name: eks.cluster
+            server: https://kubernetes.default.svc
   destination:
-    name: eks.cluster
+    server: https://kubernetes.default.svc
     namespace: argocd
   syncPolicy:
     automated:

@@ -15,9 +15,10 @@
       - [Standup Management k8s Cluster](#standup-management-k8s-cluster)
       - [Standup Argo CD (non-HA)](#standup-argo-cd-non-ha)
       - [Standup Crossplane via Argo](#standup-crossplane-via-argo)
-      - [Deploy apps to our cluster(s) via Argo](#deploy-apps-to-our-clusters-via-argo)
       - [Create an EKS cluster with Argo & Crossplane](#create-an-eks-cluster-with-argo--crossplane)
       - [Spin up the EKS cluster](#spin-up-the-eks-cluster)
+      - [Add the Cluster to Argo CD](#add-the-cluster-to-argo-cd)
+      - [Deploy apps to our cluster(s) via Argo](#deploy-apps-to-our-clusters-via-argo)
     - [Cleanup (Declarative)](#cleanup-declarative)
 
 - Heavily inspired by this:
@@ -240,6 +241,61 @@ git push origin master
 # Wait for things to stabilize...
 ```
 
+#### Create an EKS cluster with Argo & Crossplane
+
+- Build and install a Crossplane XRD for our EKS cluster
+
+```sh
+cd crossplane-xrds/eks-configuration
+rm *.xpkg
+kubectl crossplane build configuration
+kubectl crossplane push configuration ${IMAGE_REPO}:${IMAGE_TAG}
+kubectl crossplane install configuration ${IMAGE_REPO}:${IMAGE_TAG}
+#kubectl crossplane install configuration ./*.xpkg
+cd ../..
+```
+
+- Provide reasonable IAM roles in the `eks-cluster-xr.yaml` file and then apply it.
+  - `arn:aws:iam::aws:policy/AmazonEKSClusterPolicy` is likely the minimum.
+
+#### Spin up the EKS cluster
+
+```sh
+kubectl apply -f ./argo-eks-cluster.yaml
+```
+
+- And ~23 minutes later, check to see if the EKS cluster is ready.
+
+```sh
+# Get all resources that represent a unit of external infrastructure such as the EKS cluster.
+kubectl get managed
+```
+
+- Other useful commands:
+
+```sh
+kubectl get crossplane  # get all resources related to Crossplane.
+kubectl get composite   # get all resources that represent an XR
+```
+
+#### Add the Cluster to Argo CD
+
+* Get new cluster name and update context:
+
+```sh
+aws eks --region us-west-2 list-clusters
+aws --region us-west-2 eks update-kubeconfig --name crossplane-prod-cluster-${CLUSTER_ID}
+# Switch our context back to the Argo cluster
+aws --region us-west-2 eks update-kubeconfig --name xplane-mgmt
+```
+
+- Add cluster to ArgoCD
+
+```sh
+argocd login localhost:8443
+argocd cluster add ${NEW_CLUSTER_CONTEXT} --name eks.cluster
+```
+
 #### Deploy apps to our cluster(s) via Argo
 
 ```sh
@@ -263,43 +319,6 @@ kubectl port-forward -n monitoring service/observability-grafana 3000:80
 ```
 
 - Then open up a web browser pointing to [https://127.0.0.1:3000/](https://127.0.0.1:3000/)
-
-#### Create an EKS cluster with Argo & Crossplane
-
-- Build and install a Crossplane XRD for our EKS cluster
-
-```sh
-cd crossplane-xrds/eks-configuration
-rm *.xpkg
-kubectl crossplane build configuration
-kubectl crossplane push configuration ${IMAGE_REPO}:${IMAGE_TAG}
-kubectl crossplane install configuration ${IMAGE_REPO}:${IMAGE_TAG}
-#kubectl crossplane install configuration ./*.xpkg
-cd ../..
-```
-
-- Provide reasonable IAM roles in the `eks-cluster-xr.yaml` file and then apply it.
-  - `arn:aws:iam::aws:policy/AmazonEKSClusterPolicy` is likely the minimum.
-
-#### Spin up the EKS cluster
-
-```sh
-kubectl apply -f ./eks-cluster-xr.yaml
-```
-
-- And ~23 minutes later, check to see if the EKS cluster is ready.
-
-```sh
-# Get all resources that represent a unit of external infrastructure such as the EKS cluster.
-kubectl get managed
-```
-
-- Other useful commands:
-
-```sh
-kubectl get crossplane  # get all resources related to Crossplane.
-kubectl get composite   # get all resources that represent an XR
-```
 
 ### Cleanup (Declarative)
 

@@ -4,7 +4,7 @@ kind: EKSCluster
 metadata:
   name: crossplane-prod-cluster
 spec:
-  # Set this to prevent Corssplane from deleting the resource.
+  # Set this to prevent Crossplane from deleting the resource.
   #DeletionPolicy: Orphan
   parameters:
     region: us-west-2
