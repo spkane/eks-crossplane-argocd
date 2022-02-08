@@ -278,9 +278,7 @@ kubectl get crossplane  # get all resources related to Crossplane.
 kubectl get composite   # get all resources that represent an XR
 ```
 
-#### Add the Cluster to Argo CD
-
-* Get new cluster name and update context:
+- Get new cluster name and update it's context:
 
 ```sh
 aws eks --region us-west-2 list-clusters
@@ -288,6 +286,8 @@ aws --region us-west-2 eks update-kubeconfig --name crossplane-prod-cluster-${CL
 # Switch our context back to the Argo cluster
 aws --region us-west-2 eks update-kubeconfig --name xplane-mgmt
 ```
+
+#### Add the Cluster to Argo CD
 
 - Add cluster to ArgoCD
 
