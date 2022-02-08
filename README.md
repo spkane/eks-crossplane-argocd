@@ -100,6 +100,7 @@ kubectl crossplane build configuration
 kubectl crossplane push configuration ${IMAGE_REPO}:${IMAGE_TAG}
 kubectl crossplane install configuration ${IMAGE_REPO}:${IMAGE_TAG}
 #kubectl crossplane install configuration ./*.xpkg
+#kubectl crossplane install configuration registry.upbound.io/upbound/platform-ref-aws:v0.2.2
 cd ../..
 ```
 
@@ -124,6 +125,8 @@ kubectl get managed
 ```sh
 kubectl get crossplane  # get all resources related to Crossplane.
 kubectl get composite   # get all resources that represent an XR
+kubectl get claim
+kubectl get pkg
 ```
 
 ### Cleanup (Imperative)
@@ -276,6 +279,8 @@ kubectl get managed
 ```sh
 kubectl get crossplane  # get all resources related to Crossplane.
 kubectl get composite   # get all resources that represent an XR
+kubectl get claim
+kubectl get pkg
 ```
 
 - Get new cluster name and update it's context:
