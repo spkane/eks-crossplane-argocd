@@ -331,7 +331,12 @@ kubectl port-forward -n monitoring service/observability-grafana 3000:80
 
 ### Cleanup (Declarative)
 
-...
+- In the ArgoCD UI:
+  - Delete `eks-apps` and wait until finished.
+  - Delete `eks-cluster` and then use `kubectl get managed` to confirm all the managed components are deleted. This will take awhile.
+  - Delete `crossplane-aws-eks` and wait until it is finished.
+- Delete the management cluster with `eksctl delete cluster --name=xplane-mgmt`. This will take awhile.
+
 ## Other Notes
 
 - [crossplane-contrib/provider-argocd](https://github.com/crossplane-contrib/provider-argocd)
